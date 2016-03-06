@@ -3,9 +3,8 @@ import os
 
 from geonode.contrib import geosites
 
-GEOSERVER_URL = 'http://geoserver.landscapesportal.org:8080/geoserver/'
+GEOSERVER_URL = 'http://geoserver.example.org:8080/geoserver/'
 
 # use GeoSites post_settings
 GEOSITES_ROOT = os.path.dirname(geosites.__file__)
 execfile(os.path.join(GEOSITES_ROOT, 'post_settings.py'))
-

@@ -5,11 +5,11 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(
-    name="landscapeportal",
-    version="0.2",
-    author="",
+    name="{{ project_name }}",
+    version="0.1",
+    author="Matthew Hanson",
     author_email="",
-    description="landscapeportal, based on GeoNode",
+    description="{{ project_name }}, a GeoNode Geosites project",
     long_description=(read('README.rst')),
     # Full list of classifiers can be found at:
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -17,12 +17,13 @@ setup(
         'Development Status :: 1 - Planning',
     ],
     license="BSD",
-    keywords="landscapeportal geonode django",
-    url='https://github.com/landscapeportal/landscapeportal',
-    packages=['landscapeportal',],
+    keywords="geonode django",
+    url='https://github.com/{{ project_name }}/{{ project_name }}',
+    packages=['{{ project_name }}',],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'geonode==2.4',
         'django-tastypie==0.11.0',
         'django-blog-zinnia==0.14.3', 
         'django-tagging==0.3.6'

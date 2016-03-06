@@ -1,0 +1,18 @@
+[
+{
+    "pk": 1, 
+    "model": "sites.site", 
+    "fields": {
+        "domain": "site1.example.org", 
+        "name": "Master"
+    }
+},
+{
+    "pk": 2, 
+    "model": "sites.site", 
+    "fields": {
+        "domain": "site2.example.org", 
+        "name": "site2"
+    }
+},
+]
