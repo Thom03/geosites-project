@@ -7,12 +7,4 @@
         "name": "Master"
     }
 },
-{
-    "pk": 2, 
-    "model": "sites.site", 
-    "fields": {
-        "domain": "site2.example.org", 
-        "name": "site2"
-    }
-},
 ]

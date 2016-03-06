@@ -15,13 +15,6 @@ ROOT_URLCONF = '{{ project_name }}.urls'
 
 # Zinnia blog app
 INSTALLED_APPS = INSTALLED_APPS + (
-    'zinnia',
-    'django_comments',
-    'tagging'
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = TEMPLATE_CONTEXT_PROCESSORS + (
-    'zinnia.context_processors.version',
 )
 
 THEME_ACCOUNT_CONTACT_EMAIL = ''
