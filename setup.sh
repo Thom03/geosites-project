@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PROJECT=$1
+PROJECT=`basename $(pwd)`
 DOMAIN=$2
 ROOTPATH=$(pwd)
 
