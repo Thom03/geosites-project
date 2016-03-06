@@ -5,9 +5,9 @@ DOMAIN=$2
 ROOTPATH=$(pwd)
 
 # update project name everywhere and working directory
-sed 's/{{ project_name }}/$PROJECT/g' * -R
-sed 's/{{ root_path }}/$ROOTPATH/g' * -R
-sed 's/{{ domain }}/$DOMAIN/g' * -R
+find . -type f -exec sed -i 's/{{ project_name }}/$PROJECT/g' {} +
+find . -type f -exec sed -i 's/{{ root_path }}/$ROOTPATH/g' {} +
+find nginx -type f -exec sed -i 's/{{ domain }}/$DOMAIN/g' {} +
 
 mkdir logs
 
