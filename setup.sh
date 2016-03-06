@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 DOMAIN=$1
-ROOTPATH=$(pwd)
-PROJECT=`basename $ROOTPATH`
+ROOTPATH=`dirname $(pwd)`
+PROJECT=`basename $(pwd)`
 
 # update project name everywhere and working directory
 find . -type f ! -name setup.sh -exec sed -i "s/{{ project_name }}/$PROJECT/g" {} +
