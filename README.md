@@ -13,6 +13,8 @@ First, create a new project using geosites-project as a template, where my_proje
 
     $ virtualenv venv --system-site-packages
 
+    $ source venv/bin/activate
+
     $ pip install geonode
 
     $ django-admin.py startproject my_project_name --template=https://github.com/terranodo/geosites-project/archive/master.zip -epu,rst,yml
