@@ -9,6 +9,12 @@ A GeoSites installation uses a 'master' GeoNode website that has access to all u
 
 First, create a new project using geosites-project as a template, where my_project_name is your unique project name and run the provided bash script to set up a virtual environment, updated project filenames in files, and install geonode.
 
+    $ sudo pip install virtualenv
+
+    $ virtualenv venv --system-site-packages
+
+    $ pip install geonode
+
     $ django-admin.py startproject my_project_name --template=https://github.com/terranodo/geosites-project/archive/master.zip -epu,rst,yml
 
     $ cd my_project_name
