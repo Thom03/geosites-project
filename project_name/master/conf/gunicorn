@@ -5,7 +5,7 @@
 
 CONFIG = {
     #'mode': 'wsgi',
-    'working_dir': '{{ root_path }}/{{ project_name }}/{{ project_name }}/master',
+    'working_dir': '{{ root_path }}/{{ project_name }}/master',
     'python': '{{ root_path }}/venv/bin/python',
     'args': (
         '--bind=127.0.0.1:8001',
