@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+
+###############################################
+# Geosite local settings
+###############################################
+
+# path for static and uploaded files
+SERVE_PATH = '/home/myuser/geonodeproject'
+
+# database info
+DATABASES = {
+    'default': {
+         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+         'NAME': 'geonode',
+         'USER': 'geonode',
+         'PASSWORD': 'geonode',
+     },
+    # vector datastore for uploads
+    'datastore' : {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+         #'ENGINE': '', # Empty ENGINE name disables 
+        'NAME': 'geonode_data',
+        'USER' : 'geonode',
+        'PASSWORD' : 'geonode',
+        'HOST' : 'localhost',
+        'PORT' : '5432',
+    }
+}
+
+# localhost by default
+# GEOSERVER_URL = 'http://localhost:8080/'
