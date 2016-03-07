@@ -1,5 +1,4 @@
 # GeoSites for GeoNode
-{{ project_name|title }}
 
 This is a template for creating a new project utilizing GeoNode's GeoSites. GeoSites is a contrib module to GeoNode starting with 2.4 and is a way to run multiple websites with a single instance of GeoNode. Each GeoSite can have different templates, applications, and data permissions but share a single database, web mapping service (GeoServer), and CSW (pycsw).  This is useful when multiple websites are desired to support different sets of users, but with a similar set of data and overall look and feel of the sites.  Users can be given permission to access multiple sites if needed, which also allows administrative groups can be set up to support all sites with one account.
 
