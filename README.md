@@ -1,13 +1,12 @@
-{{ project_name|title }}
-========================
+# {{ project_name|title }}
 
-This is a template for creating a new project utilizing GeoSites. GeoSites is a contrib module to GeoNode starting with 2.4. The GeoSites app is a way to run multiple websites with a single instance of GeoNode. Each GeoSite can have different templates, applications, and data permissions but share a single database, web mapping service (GeoServer), and CSW (pycsw).  This is useful when multiple websites are desired to support different sets of users, but with a similar set of data and overall look and feel of the sites.  Users can be given permission to access multiple sites if needed, which also allows administrative groups can be set up to support all sites with one account.
+This is a template for creating a new project utilizing GeoNode's GeoSites. GeoSites is a contrib module to GeoNode starting with 2.4 and is a way to run multiple websites with a single instance of GeoNode. Each GeoSite can have different templates, applications, and data permissions but share a single database, web mapping service (GeoServer), and CSW (pycsw).  This is useful when multiple websites are desired to support different sets of users, but with a similar set of data and overall look and feel of the sites.  Users can be given permission to access multiple sites if needed, which also allows administrative groups can be set up to support all sites with one account.
 
-A GeoSites installation uses a 'master' GeoNode website that has access to all users, groups, and data. Through the Django admin page, Layers, Maps, Documents, Users, and Groups can be added and removed from all sites.  Users can be given access to any number of sites, and data may appear on only a single site, or all of them.  The master site need not be accessible from the outside so that it can be used as an internal tool to the organization. Users created on a site are created with access to just that site (but not the master site).  Data uploaded to a site is given permission on that site as well as the master site.
+A GeoSites installation uses a 'master' GeoNode website that has access to all users, groups, and data. Through the Django admin page, Layers, Maps, Documents, Users, and Groups can be added and removed from all sites.  Users can be given access to any number of sites, and data may appear on only a single site, or all of them.  The master site need not be accessible from the outside so that it can be used as an internal tool to the organization. Users created on a site are created with access to just that site (but not the master site).  Data uploaded to a site is given permission on that site as well as the master site. The master site, and all of the individual GeoSites, share a single database. Objects, including users, groups, and data layers, all appear within the database with an additional table indicating which users and sites have access to which data.
 
 ## Installation
 
-First, create a new project using geosites-project as a template, where my_project_name is your unique project name and run the provided bash script to set up a virtual environment, updated project filenames in files, and install geonode.
+To create a new project using geosites-project as a template, folllow the steps below to set up a virtual environment, install GeoNode, and create a GeoSites project.  In the examples below project_name is a unique name for your project and example.org is the domain for the GeoNode sites.
 
     $ sudo pip install virtualenv
 
@@ -17,22 +16,24 @@ First, create a new project using geosites-project as a template, where my_proje
 
     $ pip install geonode
 
-    $ django-admin.py startproject my_project_name --template=https://github.com/terranodo/geosites-project/archive/master.zip -epu,rst,yml
+    $ django-admin.py startproject project_name --template=https://github.com/terranodo/geosites-project/archive/master.zip -epu,rst,yml
 
-    $ cd my_project_name
+    $ cd project_name
 
     $ bash ./setup.sh example.org
 
-where example.org is the base domain name for the GeoNode sites.
 
+### GeoServer
+
+A single GeoServer instance is used to serve data to all of the GeoSites.  Install GeoServer as normal for GeoNode either on the same machine or a different one. Each site will proxy the /geoserver URL to the address of GeoServer. However, The default GeoNode installation sets the URL of the GeoNode site in one of the GeoServer config files: Edit the *GEOSERVER_DATA_DIR/security/auth/geonodeAuthProvider/config.xml* by changing the baseUrl field to an empty string:
+
+    <baseUrl></baseUrl>
+
+When baseUrl is empty, GeoServer will attempt to authenticate against the requesting URL.  Since a reverse proxy to GeoServer is configured on the web servers the requesting URL can be used to determine the URL to GeoNode. In fact, setting baseUrl to an empty string will work on a non GeoSites implementation of GeoNode as well, since a proxy is configured by default for a regular GeoNode project as well.
 
 ## GeoSites Project
 
-A GeoSites project looks similar to a normal GeoNode project, but with additional folders for sites, and more settings files. In the project there is a directory for each site: 'master' and 'site2' in the example listing below. Each site folder contains a settings file (and optionally local_settings) with site specific settings, as well as directories for static files and Django templates. In addition are configuration files necessary to serve the site: nginx, gunicorn, and wsgi.py. GeoSites works via a hierarchy: first default GeoNode, then GeoSites settings, then project settings, then site specific settings. This hierachy is used for settings, templates, and static files.
-
-The project_name folder contains common settings in the pre_settings.py, post_settings.py, and optionally local_settings.py files.  There is also a sites.json file, which is a JSON file of the sites database table.  This is for convenience, as the file will contain the site IDs and names for all currently enabled sites.  The urls file is a common urls file, although each site could have their own urls file if needed (by creating one and setting it in the site specific settings file).
-
-The top level directory contains two manage scripts, and a typical setup script. The familiar manage.py is a regular Django manage file that uses the master site for the settings file. This is the command that should be used when doing many tasks such as inspecting the database, creating a super-user, or adding a new site.  The manage_all.py script is when a command should be run on all sites, syncdb and collectstatic being the common ones.  The syncdb command will call sync the DB to the settings file of each site, while collectstatic will loop through the sites and collect the static files of all sites in the common location they are served from.
+After installing you will have a directory of files for your project. A GeoSites project looks similar to a normal GeoNode project, but with additional folders and settings files for sites. In the project below there is just one directory for the master site. Additional sites will have the same structure as the master site. Each site folder contains a settings file and local_settings with site specific settings, as well as directories for static files and Django templates, and web server and application configuration files (nginx, gunicorn, wsgi.py).
 
 ~~~
 geosites-project
@@ -60,59 +61,21 @@ geosites-project
 │   │   └── wsgi.py
 │   ├── post_settings.py
 │   ├── pre_settings.py
-│   ├── site2
-│   │   ├── conf
-│   │   │   ├── gunicorn
-│   │   │   └── nginx
-│   │   ├── __init__.py
-│   │   ├── local_settings.py
-│   │   ├── settings.py
-│   │   ├── static
-│   │   │   ├── css
-│   │   │   │   └── site_base.css
-│   │   │   ├── img
-│   │   │   │   └── README
-│   │   │   ├── js
-│   │   │   │   └── README
-│   │   │   └── README
-│   │   ├── templates
-│   │   │   ├── site_base.html
-│   │   │   ├── site_index.html
-│   │   └── wsgi.py
 │   ├── sites.json
 │   └── urls.py
 ├── manage_all.py
 ├── manage.py
 ├── README.rst
-└── setup.py
+├── setup.py
+└── setup.sh
 ~~~
 
+## Configuration Hierarchy
 
-### Usage
-
-    - Rename the site2 folder to be the same of the site
-
-    - It is necessary to edit the settings file inside each site app and change the SITE_ID and SITE_NAME (or leave it default, it will be GeoSite-SITE_ID).
-
-    - All the GeoSites share the same database that is defined in geosites-project/project_name/local_settings.py file. For development or if you need a separate database (such as for a particular app) uncomment and edit the SITE_DATABASES directive in the settings.py file in that sites directory.
-
-
-After configuring the settings for yuor GeoSites, migrate the daa and load initial data into the database.
-
-    $ cd geosites-project
-
-    $ python manage.py syncdb
-
-    $ python manage.py loaddata landscapeportal/sites.json
-
-
-By default the master site is already registered in the database, it is although necessary to add one for each site that you created and this can be done through the administation interface at /admin. Add a new site with Display Name = SITE_NAME and Domain ad the expected public web address of the site. The Master site has ID=1 and every subsequently created site will have the ID incremented by 1.
-
-
+GeoSites configuration files (for settings, templates, and static files) work in a hierarchy: first default GeoNode, then GeoSites (from geosites contrib module), then project, then site specific. There is also a sites.json file, which is a JSON file of the sites database table.  This is for convenience, as the file will contain the site IDs and names for all currently enabled sites.  The urls file is a common urls file, although each site could have their own urls file if needed (by creating one and setting it in the site specific settings file *siteX/settings.py*).
 
 ### Settings
-
-Site settings are managed through the use of common settings files as well as site specific settings files.   A simple site settings file looks like this:
+Site settings are managed through the use of common settings files as well as site specific settings files. The project folder contains common settings in the pre_settings.py, post_settings.py, and local_settings.py files, while sites contain settings.py and local_settings.py files. An example site settings.py file is shown here.
 
 ~~~
 import os
@@ -123,8 +86,8 @@ GEOSITES_ROOT = os.path.dirname(geosites.__file__)
 execfile(os.path.join(GEOSITES_ROOT, 'pre_settings.py'))
 
 # Site specific variables
-SITE_ID = $SITE_ID
-SITE_NAME = '$SITE_NAME'
+SITE_ID = 2
+SITE_NAME = 'site2'
 SECRET_KEY = "fbk3CC3N6jt1AU9mGIcI"
 SITE_APPS = ()
 SITE_DATABASES = {}
@@ -132,7 +95,7 @@ SITE_DATABASES = {}
 # Overrides - common settings that might be overridden for site
 
 # urls for all sites
-# ROOT_URLCONF = 'projectname.urls'
+# ROOT_URLCONF = 'projectname.site2.urls'
 
 # admin email
 # THEME_ACCOUNT_CONTACT_EMAIL = ''
@@ -149,51 +112,47 @@ execfile(os.path.join(GEOSITES_ROOT, 'post_settings.py'))
 
 This settings file first reads in the GeoSites pre_settings.py file, which in turns reads in the default GeoNode settings then overrides some of the values.  Then, site specific variables are set: the site ID, name, and secret key.  SITE_APPS are additional apps that should be added to this site, while SITE_DATABASES is used when a site should be using a separate database (such as for a datastore of geospatial data separate from other sites).  In this case add a geospatial DB to the SITE_DATABASES dictionary (or in the local_settings, see below), then set DATASTORE to the key of that database.
 
-While Django apps on other sites are not automatically added, for single site administration they can be added to the master site through the master site settings.py file. 
+To make the sites easier to administrate it is recommended that any site added to a site also be added to the master site settings.py file. This will allow it to be administered throught the admin panel of the master site rather than only through the specific site.
 
+#### Local Settings
 
-##### Local Settings
-
-Databases are usually set in a local_settings file, as are other production settings.  The local_settings file in the project directory is used by all sites, so it is here where the database is set for all sites.
+Databases are usually set in a local_settings file, as are other production settings.  The local_settings file in the project directory is used by all sites, so it is here where the database is set for all sites. Here is an example project local_settings file.
 
 ~~~
 # path for static and uploaded files
-# SERVE_PATH = ''
+SERVE_PATH = '/home/myuser/geonodeproject'
 
-"""
 DATABASES = {
-    'default' : {
+    'default': {
+         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+         'NAME': 'geonode',
+         'USER': 'geonode',
+         'PASSWORD': 'geonode',
+     },
+    # vector datastore for uploads
+    'datastore' : {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': '',
-        'USER' : '',
-        'PASSWORD' : '',
+         #'ENGINE': '', # Empty ENGINE name disables 
+        'NAME': 'geonode_data',
+        'USER' : 'geonode',
+        'PASSWORD' : 'geonode',
         'HOST' : 'localhost',
         'PORT' : '5432',
     }
-    # vector datastore for uploads
-    # 'datastore' : {
-    #    'ENGINE': 'django.contrib.gis.db.backends.postgis',
-    #    'NAME': '',
-    #    'USER' : '',
-    #    'PASSWORD' : '',
-    #    'HOST' : '',
-    #    'PORT' : '',
-    # }
 }
-"""
 
 GEOSERVER_URL = 'http://localhost:8080/'
 ~~~
 
-SERVE_PATH is the path used for serving of static files for all sites (it is also where webserver logs will be put). DATABASES are any production databases used by all sites. In the example above there is a database for the Django database, and another used for storing geospatial vector data served by GeoServer.  The GEOSERVER_URL is the internal URL (not the reverse proxy URL) of GeoServer, localhost port 8080 if running on the same machine.
+SERVE_PATH is the path used for serving of static files for all sites (it is also where webserver logs will be put). DATABASES are any production databases used by all sites. In the example above there is a database for the Django database, and another used for storing geospatial vector data served by GeoServer.  The GEOSERVER_URL is the **internal URL** (not the reverse proxy URL) of GeoServer, localhost port 8080 if running on the same machine.
 
-Specific sites must also have a local_settings file in production environments.  This sets the SITEURL, as well as fixes the location of GeoServer for production.
+Specific sites must also have a local_settings file in production environments, which sets the SITEURL.
 
 ~~~
 import os
 
 # Outside URL
-SITEURL = 'http://$DOMAIN'
+SITEURL = 'http://master.example.org'
 
 # databases unique to site if not defined in site settings
 """
@@ -206,33 +165,38 @@ SITE_DATABASES = {
 """
 ~~~
 
+### Templates and Static Files
 
-Web and Application Servers
-=====================
-Created GeoSites have configuration files for nginx (as the web server) and gunicorn (as the application server).  While Apache config files (with mod_wsgi as the application server) are not currently genererated, Apache supports the same configuration necessary for GeoSites to work.
+The template used for any given page will be be the first one found, so templates in the SITE_ROOT/templates directory will override those in PROJECT_ROOT/templates, which will override those in GEONODE_ROOT/templates.  Static files use a hierarchy similar to the the template directories.  However, they work differently because (on a production server) they are collected and stored in a single location.  Because of this care must be taken to avoid clobbering of files between sites, so each site directory should contain all static files in a subdirectory with the name of the site (e.g., static/siteA/logo.png )
 
-A single GeoServer instance is used to serve data to all of the GeoSites.  Each site proxies the /geoserver URL to the internal address of GeoServer.  The default GeoNode installation sets the URL of the GeoNode site in one of the GeoServer config files: GEOSERVER_DATA_DIR/security/auth/geonodeAuthProvider/config.xml  Change the baseUrl field to an empty string:
+The location of the proper static directory can then be found in the templates syntax such as:
 
-    <baseUrl></baseUrl>
-
-When baseUrl is empty, GeoServer will attempt to authenticate against the requesting URL.  Since a reverse proxy to GeoServer is configured on the web servers the requesting URL can be used to determine the URL to GeoNode.
-
-Databases
-=====================
-The master site, and all of the individual GeoSites, share a single database in a normal GeoSites setup. Objects, including users, groups, and data layers, all appear within the database but an additional sites table indicates which objects have access to which sites.  The geospatial data served by GeoServer (e.g., from PostGIS) can exist in the database like normal, since GeoServer will authenticate against the correct site, which will use it's database to determine permissions based on the object, current user, and site.
+    {{ STATIC_URL }}{{ SITENAME|lower }}/logo.png
 
 
-#### Adding New Sites
+## Site Management
 
-A management command exists to easily create a new site.  This will create all the needed directories, as well as a site specific settings file.  The command may also create a website configuration file.
+The top level directory contains two manage scripts, a standard Python setup script and a bash script. The familiar manage.py is a regular Django manage file that uses the master site as the settings file. This is the command that should be used when doing many tasks such as inspecting the database, creating a super-user, or adding a new site.  The manage_all.py script is when a command should be run on all sites, such as syncdb and collectstatic.  The syncdb command will sync the DB using the settings file of each site  and is required if there are different INSTALLED_APPS in each site. The collectstatic command will loop through the sites and collect the static files of all sites in the common location they are served from.
 
-    $ python manage.py addsite sitename sitedomain
-    # example
-    $ python manage.py addsite site3 site3.example.com
+After setting up the project for the first time, or when updating the code, the database needs to be migrated and any seed data loaded. All the GeoSites share the same database that is defined in geosites-project/project_name/local_settings.py file. For development or if you need a separate database uncomment and edit the SITE_DATABASES directive in the settings.py file in that sites directory.
 
-This will create a new directory of files:
+    $ cd project_name
+
+    $ python manage.py syncdb
+
+    $ python manage.py loaddata project_name/sites.json
+
+By default the master site is already registered in the database and has an ID of 1. Additional sites created will have the ID incremented by 1, thus the first site created after the master site will have an ID of 2.
+
+### Adding New Sites
+
+A management command exists to create a new site, which includes all the needed directories, site specific settings file, and website configuration files. Website files currently include nginx (as the web server) and gunicorn (as the application server).  While Apache config files (with mod_wsgi as the application server) are not currently genererated, Apache supports the same configuration necessary for GeoSites to work.
+
+    $ python manage.py addsite mynewgeosite mynewgeosite.example.org
+
+Which will create a new directory of files:
 ~~~
-│   ├── site3
+│   ├── mynewgeosite
 │   │   ├── conf
 │   │   │   ├── gunicorn
 │   │   │   └── nginx
@@ -253,41 +217,20 @@ This will create a new directory of files:
 │   │   └── wsgi.py
 ~~~
 
-
-#### Templates and Static Files
-
-As mentioned above, GeoSites uses a hierachy for static files and templates. The first template file found will be the one used so templates in the SITE_ROOT/templates directory will override those in PROJECT_ROOT/templates, which will override those in GEONODE_ROOT/templates.  Static files use a hierarchy similar to the the template directories.  However, they work differently because (on a production server) they are collected and stored in a single location.  Because of this care must be taken to avoid clobbering of files between sites, so each site directory should contain all static files in a subdirectory with the name of the site (e.g., static/siteA/logo.png )
-
-The location of the proper static directory can then be found in the templates syntax such as:
-
-    {{ STATIC_URL }}{{ SITENAME|lower }}/logo.png
-
-
 #### Permissions by Site
 
-Users are added by default to the site on where they are created and they belong to that site only. However, an admin can add or remvoe people from sites through the "Site People" admin panel (Admin->GeoSites->sitepeople). Select the desired site and move people between the boxes to enable or disable them from the site. 
+Users are added by default to the site on where they are created and they belong to that site only. However, an admin can add or remove users from sites through the "Site People" admin panel (Admin->GeoSites->sitepeople). Select the desired site and move people between the boxes to enable or disable them from the site. 
 
-By default data added to GeoNode is publicly available. In the case of GeoSites, new data will be publicly available, but only for the site it was added to, and the master site (all data is added to the master site). Sharing a resource with other sites involved altering the SiteResource table in the admin panel (Admin->GeoSites->SiteResource).  Add available data to a site or remove by moving resources between the two panels.  Once the changes are saved the sites will have the new resources added (or removed).
+By default data added to GeoNode is publicly available. In the case of GeoSites, new data will be publicly available, but only for the site it was added to, and the master site (all data is added to the master site). Sharing a resource with other sites is done through the SiteResources table admin panel (Admin->GeoSites->SiteResource).  Add or remove available data to a site by moving resources between the two panels.
 
-#### Development
+## Development
 
-A good setup could be to have geonode and landscapeportal at the same level in the virtualenv folder so that geoserver can run from the geonode folder with::
+Without the local_settings files that specify database and site url, GeoSites will utilize a SQLlite database and run on localhost, which is used for development. A specific site can be run locally for development purposes by using the runserver command as normal. Run multiple sites be calling runserver multiple times with a different port for each site:
 
-    $ paver start_geoserver
-
-In development mode it is possible to run multiple sites by binding the django development server on different ports. To run a particular site, from it's directory run the server with::
-  
-    $ python manage.py runserver localhost:XXXX --settings=my_project_name.siteX.settings
-
-For the master site it's enough to run::
-
+    # for the master site
     $ python manage.py runserver
+  
+    # for each geosite
+    $ python manage.py runserver localhost:XXXX --settings=project_name.siteX.settings
 
-In order to have the sites to share the same SqlLite database uncomment the content of each SITE_DATABASES directive in the settings.py files.
-
-Every site will be available at the port specified with the runserver command.
-
-CUSTOMIZE THE LOOK AND FEEL
-
-The GeoSites app overrides several parts of GeoNode, the override technique is used for templates as well.
-In order to customize a template, like the blog app, it is enough to reproduse the same template folder structure of the zinnia blog app and write a template with the same name. The templates defined in this app will be used in place of the original ones provided by GeoNode or any third party app.
+When customizing the look and feel of each specific site or the project as a whole keep in mind the hiearchy described above, which is used for templates as well. Override templates for a site by reproducing the same template folder structure as is provided by the app. If you override templates on one site they will only be used for that specific site, but other sites will still use the default templates.
