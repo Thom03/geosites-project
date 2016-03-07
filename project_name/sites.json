@@ -6,5 +6,5 @@
         "domain": "site1.{{ domain }}", 
         "name": "Master"
     }
-},
+}
 ]
