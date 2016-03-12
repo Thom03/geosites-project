@@ -2,6 +2,7 @@
 
 import os
 import sys
+import subprocess
 
 PROJECT = '{{ project_name }}'
 
@@ -13,5 +14,6 @@ if __name__ == "__main__":
         print 'Managing %s' % site
         path = '%s/%s/settings.py' % (PROJECT, site)
         if os.path.exists(path):
-                os.environ.setdefault("DJANGO_SETTINGS_MODULE", "%s.%s.settings" % (PROJECT, site))
-                execute_from_command_line(sys.argv)
+                os.environ["DJANGO_SETTINGS_MODULE"] = "%s.%s.settings" % (PROJECT, site))
+                # call manage.py with above settings to avoid django caching settings in a single session
+                subprocess.call(['python', 'manage.py'] + sys.argv[1:])
