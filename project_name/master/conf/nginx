@@ -1,10 +1,4 @@
 
-# This template uses the following variables to be filled in
-#  $SITEURL  	- base url
-#  $ROOTPATH	- path to main project (used to store logs, uploaded, static)
-#  $GSURL	- GeoServer machine URL (can be localhost)
-#  $PORTNUM	- Port number to use for wsgi app: use 80XX where XX is SITE_ID
-
 # If virtual host responds to multiple names this server block ensures request 
 # domain is always same or else cookies have problems between GeoServer and main site
 #server {
@@ -14,25 +8,25 @@
 
 server {
     listen 80;
-    server_name master.* site1.* geonode.* dev.*;
+    server_name master.* geonode.* dev.*;
 
     client_max_body_size 1G;
     send_timeout 120;
 
-    access_log /geo/logs/master-nginx-access.log;
-    error_log /geo/logs/master-nginx-error.log;
+    access_log {{ root_path }}/logs/master-nginx-access.log;
+    error_log {{ root_path }}/logs/master-nginx-error.log;
 
     location /static {
-        alias /geo/static;
+        alias {{ root_path }}/static;
         gzip_static on;
     }
 
     location /media {
-        alias /geo/media;
+        alias {{ root_path }}/media;
     }
 
     location /uploaded {
-        alias /geo/uploaded;
+        alias {{ root_path }}/uploaded;
     }
 
     location /favicon.ico {
