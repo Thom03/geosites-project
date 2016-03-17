@@ -25,7 +25,7 @@ To create a new project using geosites-project as a template, folllow the steps 
 
 ### GeoServer
 
-A single GeoServer instance is used to serve data to all of the GeoSites.  Install GeoServer as normal for GeoNode either on the same machine or a different one. Each site will proxy the /geoserver URL to the address of GeoServer. However, The default GeoNode installation sets the URL of the GeoNode site in one of the GeoServer config files: Edit the *GEOSERVER_DATA_DIR/security/auth/geonodeAuthProvider/config.xml* by changing the baseUrl field to an empty string:
+A single GeoServer instance is used to serve data to all of the GeoSites.  Install GeoServer as normal for GeoNode either on the same machine or a different one. Each site will proxy the /geoserver URL to the address of GeoServer (see the nginx configuration files). However, The default GeoNode installation sets the URL of the GeoNode site in one of the GeoServer config files: Edit the *GEOSERVER_DATA_DIR/security/auth/geonodeAuthProvider/config.xml* by changing the baseUrl field to an empty string:
 
     <baseUrl></baseUrl>
 
@@ -122,6 +122,7 @@ Databases are usually set in a local_settings file, as are other production sett
 # path for static and uploaded files
 SERVE_PATH = '/home/myuser/geonodeproject'
 
+# database info
 DATABASES = {
     'default': {
          'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -141,10 +142,26 @@ DATABASES = {
     }
 }
 
-GEOSERVER_URL = 'http://localhost:8080/'
+# email account for sending email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+#REGISTRATION_OPEN=True
+#ACCOUNT_EMAIL_CONFIRMATION_EMAIL=True
+#ACCOUNT_EMAIL_CONFIRMATION_REQUIRED=True
+
+# uncomment for production
+# PROXY_ALLOWED_HOSTS = ('.{{ domain }}')
+
+# localhost by default
+# GEOSERVER_URL = 'http://localhost:8080/'
 ~~~
 
-SERVE_PATH is the path used for serving of static files for all sites (it is also where webserver logs will be put). DATABASES are any production databases used by all sites. In the example above there is a database for the Django database, and another used for storing geospatial vector data served by GeoServer.  The GEOSERVER_URL is the **internal URL** (not the reverse proxy URL) of GeoServer, localhost port 8080 if running on the same machine.
+SERVE_PATH is the path used for serving of static files for all sites (it is also where webserver logs will be put). DATABASES are any production databases used by all sites. In the example above there is a database for the Django database, and another used for storing geospatial vector data served by GeoServer.  The email account is used by GeoNode to send emails to users when needed. PROXY_ALLOWED_HOSTS should be uncommented in production. The GEOSERVER_URL is the **internal URL** (not the reverse proxy URL) of GeoServer, localhost port 8080 if running on the same machine.
 
 Specific sites must also have a local_settings file in production environments, which sets the SITEURL.
 
@@ -222,6 +239,39 @@ Which will create a new directory of files:
 Users are added by default to the site on where they are created and they belong to that site only. However, an admin can add or remove users from sites through the "Site People" admin panel (Admin->GeoSites->sitepeople). Select the desired site and move people between the boxes to enable or disable them from the site. 
 
 By default data added to GeoNode is publicly available. In the case of GeoSites, new data will be publicly available, but only for the site it was added to, and the master site (all data is added to the master site). Sharing a resource with other sites is done through the SiteResources table admin panel (Admin->GeoSites->SiteResource).  Add or remove available data to a site by moving resources between the two panels.
+
+## Production
+
+In summary, to create a new project running on a production machine, take the following steps after following the installation instructions given above.
+
+    - Create local_settings.py in your projectect directory and all site directories (master, site2, etc.) based on the provided local_settings.py.sample
+
+    - Edit project/local_settings.py to contain your unique site information for production: the serve path (which must exist) where static files will be collected, database connection information, Email account info, registration options, and the GeoServer URL.
+
+    - Edit site local_settings in each site directory. Any info that is different than the project local_settings should be provided here, otherwise those will be used (e.g., DATABASES from project/local_settings.py). Otherwise, the only thing that is required in the site local_settings is SITEURL.
+
+    - Initialize the database with syncdb and loaddata as given above under Site Management
+
+    - Add new sites as desired
+
+Now, links can be created for nginx and gunicorn, and the services restart:
+
+    $ cd /etc/nginx/sites-available
+
+    $ ln -s /full/path/to/project/project/master/conf/nginx master
+
+    $ cd /etc/nginx/sites-enabled
+
+    $ ln -s ../sites-available/master ./
+
+    $ cd /etc/gunicorn.d
+
+    $ ln -s /full/path/to/project/project/master/conf/gunicorn master
+
+    $ sudo service nginx restart
+
+    $ sudo service gunicorn restart
+
 
 ## Development
 
