@@ -3,7 +3,7 @@
     "pk": 1, 
     "model": "sites.site", 
     "fields": {
-        "domain": "site1.{{ domain }}", 
+        "domain": "geonode.{{ domain }}", 
         "name": "Master"
     }
 }
