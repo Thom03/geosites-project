@@ -23,7 +23,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'geonode==2.4',
+        'geonode==2.6',
         'django-tastypie==0.11.0',
         'django-blog-zinnia==0.14.3', 
         'django-tagging==0.3.6'
